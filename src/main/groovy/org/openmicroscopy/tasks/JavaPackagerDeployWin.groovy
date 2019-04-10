@@ -58,23 +58,23 @@ class JavaPackagerDeployWin implements CommandLineArgumentProvider {
         List<String> cmd = []
 
         if (installDirChooser.isPresent()) {
-            cmd.add("-BinstalldirChooser=${installDirChooser.get()}")
+            cmd.add("-BinstalldirChooser="+String.valueOf(installDirChooser.get()))
         }
 
         if (addShortcut.isPresent()) {
-            cmd.add("-BshortcutHint=${addShortcut.get()}")
+            cmd.add("-BshortcutHint="+String.valueOf(addShortcut.get()))
         }
 
         if (copyright.isPresent()) {
-            cmd.add("-Bcopyright=${copyright.get()}")
+            cmd.add("-Bcopyright="+copyright.get())
         }
 
         if (startMenuGroup.isPresent()) {
-            cmd.add("-Bwin.menuGroup=${startMenuGroup.get()}")
+            cmd.add("-Bwin.menuGroup="+startMenuGroup.get())
         }
 
         if (registryVendor.isPresent()) {
-            cmd.add("-Bvendor=${registryVendor.get()}")
+            cmd.add("-Bvendor="+registryVendor.get())
         }
 
         return cmd

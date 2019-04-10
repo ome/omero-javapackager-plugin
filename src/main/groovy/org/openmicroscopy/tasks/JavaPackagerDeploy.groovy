@@ -1,8 +1,6 @@
 package org.openmicroscopy.tasks
 
 import groovy.transform.CompileStatic
-import groovy.transform.TypeChecked
-import groovy.transform.TypeCheckingMode
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
@@ -118,7 +116,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
 
         List jvmOptionsList = jvmOptions.get()
         if (!jvmOptionsList.isEmpty()) {
-            jvmOptionsList.each { String option ->
+            jvmOptionsList.each { Object option ->
                 args.add("-BjvmOptions=" + option)
             }
         }
@@ -134,8 +132,8 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
         // Unnamed arguments
         def unnamedArgs = arguments.get()
         if (!unnamedArgs.isEmpty()) {
-            unnamedArgs.each { String argument ->
-                Collections.addAll(args, "-argument", argument)
+            unnamedArgs.each { Object argument ->
+                Collections.addAll(args, "-argument", (String) argument)
             }
         }
 
