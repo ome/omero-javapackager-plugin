@@ -1,0 +1,21 @@
+plugins {
+    id "groovy"
+    id "org.openmicroscopy.plugin-project" version "5.5.0-m5"
+}
+
+gradlePlugin {
+    plugins {
+        jpackager {
+            id = "org.openmicroscopy.jpackager"
+            implementationClass = "org.openmicroscopy.JavaPackagerPlugin"
+        }
+    }
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation "commons-io:commons-io:2.6"
+}
