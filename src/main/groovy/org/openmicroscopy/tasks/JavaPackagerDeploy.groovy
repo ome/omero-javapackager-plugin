@@ -1,8 +1,26 @@
+/*
+ * -----------------------------------------------------------------------------
+ *  Copyright (C) 2019 University of Dundee & Open Microscopy Environment.
+ *  All rights reserved.
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * ------------------------------------------------------------------------------
+ */
 package org.openmicroscopy.tasks
 
 import groovy.transform.CompileStatic
-import groovy.transform.TypeChecked
-import groovy.transform.TypeCheckingMode
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
@@ -17,6 +35,7 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.process.CommandLineArgumentProvider
+import org.gradle.util.GradleVersion
 
 import java.nio.file.Path
 
@@ -84,7 +103,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
         icon = project.objects.fileProperty()
         outputDir = project.objects.directoryProperty()
         srcDir = project.objects.directoryProperty()
-        srcFiles = project.objects.fileCollection()
+        srcFiles = project.files()
     }
 
     @Override
@@ -107,7 +126,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
             Collections.addAll(args, "-native", nativeType.get())
         }
 
-        Map bundleArgs = applicationArguments.get()
+        Map<String, String> bundleArgs = applicationArguments.get()
         if (!bundleArgs.isEmpty()) {
             def appArgs = new StringBuilder()
             bundleArgs.each { entry ->
@@ -116,7 +135,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
             args.add("-Barguments=\"" + appArgs.toString().trim() + "\"")
         }
 
-        List jvmOptionsList = jvmOptions.get()
+        List<String> jvmOptionsList = jvmOptions.get()
         if (!jvmOptionsList.isEmpty()) {
             jvmOptionsList.each { String option ->
                 args.add("-BjvmOptions=" + option)
@@ -132,7 +151,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
         }
 
         // Unnamed arguments
-        def unnamedArgs = arguments.get()
+        List<String> unnamedArgs = arguments.get()
         if (!unnamedArgs.isEmpty()) {
             unnamedArgs.each { String argument ->
                 Collections.addAll(args, "-argument", argument)

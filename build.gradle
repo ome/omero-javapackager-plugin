@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "org.openmicroscopy"
-version = "5.5.0-m1"
+version = "5.5.0-SNAPSHOT"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -21,8 +21,8 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        jpackager {
-            id = "org.openmicroscopy.jpackager"
+        javapackager {
+            id = "org.openmicroscopy.javapackager"
             implementationClass = "org.openmicroscopy.JavaPackagerPlugin"
         }
     }
