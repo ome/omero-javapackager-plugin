@@ -1,8 +1,6 @@
 package org.openmicroscopy.tasks
 
 import groovy.transform.CompileStatic
-import groovy.transform.TypeChecked
-import groovy.transform.TypeCheckingMode
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
@@ -17,6 +15,7 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.process.CommandLineArgumentProvider
+import org.gradle.util.GradleVersion
 
 import java.nio.file.Path
 
@@ -84,7 +83,12 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
         icon = project.objects.fileProperty()
         outputDir = project.objects.directoryProperty()
         srcDir = project.objects.directoryProperty()
-        srcFiles = project.objects.fileCollection()
+
+        if (GradleVersion.current() >= GradleVersion.version("5.3")) {
+            this.srcFiles = project.objects.fileCollection()
+        } else {
+            this.srcFiles = project.files()
+        }
     }
 
     @Override
