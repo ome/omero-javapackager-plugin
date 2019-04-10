@@ -3,13 +3,12 @@ plugins {
     id "org.openmicroscopy.plugin-project" version "5.5.0-m5"
 }
 
-gradlePlugin {
-    plugins {
-        jpackager {
-            id = "org.openmicroscopy.jpackager"
-            implementationClass = "org.openmicroscopy.JavaPackagerPlugin"
-        }
-    }
+group = "org.openmicroscopy"
+version = "5.5.0-m1"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 repositories {
@@ -18,4 +17,13 @@ repositories {
 
 dependencies {
     implementation "commons-io:commons-io:2.6"
+}
+
+gradlePlugin {
+    plugins {
+        jpackager {
+            id = "org.openmicroscopy.jpackager"
+            implementationClass = "org.openmicroscopy.JavaPackagerPlugin"
+        }
+    }
 }
