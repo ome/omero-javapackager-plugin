@@ -26,7 +26,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.internal.CollectionCallbackActionDecorator
 import org.gradle.api.plugins.ApplicationPlugin
-import org.gradle.api.plugins.JavaApplication
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.JavaExec
@@ -72,7 +71,12 @@ class JavaPackagerPlugin implements Plugin<Project> {
             createJavaPackagerTask(deployExt)
         }
 
-        configureForDeploy(deployContainer.create(MAIN_DEPLOY_NAME))
+        deployContainer.create(MAIN_DEPLOY_NAME, new Action<DefaultInstallOptions>() {
+            @Override
+            void execute(DefaultInstallOptions opts) {
+                configureForDeploy(opts)
+            }
+        })
     }
 
     void configureForDeploy(DefaultInstallOptions deploy) {
@@ -82,49 +86,35 @@ class JavaPackagerPlugin implements Plugin<Project> {
         // Set the default package types
         deploy.outputTypes = outputTypes
 
-//        deploy.exe {
-//            it.addShortcut = true
-//            it.installUserLevel = true
-//            it.installDirChooser = true
-//            it.icon = project.file("${project.projectDir}/icons/omeroinsight.ico")
-//        }
-        deploy.dmg {
-            it.icon = project.file("${project.projectDir}/icons/omeroinsight.icns")
-        }
+        project.afterEvaluate {
+            // Use the command line arguments from the 'run' task
+            def exec = project.tasks.getByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
+            deploy.mainClassName = exec.main
+            deploy.arguments = exec.args
+            deploy.javaOptions = exec.jvmArgs
 
-        // Use the mainClassName and jvm args from the 'application' extension
-        JavaApplication javaApplication = project.extensions.getByName("application") as JavaApplication
-        deploy.mainClassName = javaApplication.mainClassName
-        deploy.javaOptions = javaApplication.applicationDefaultJvmArgs
+            // The mainJar is the archive created by the 'jar' task
+            def jar = project.tasks.getByName(JavaPlugin.JAR_TASK_NAME) as Jar
+            deploy.mainJar = jar.archiveFileName
 
-        // Use the command line arguments from the 'run' task
-        JavaExec runTask = project.tasks.named(ApplicationPlugin.TASK_RUN_NAME, JavaExec).get()
-        deploy.arguments = runTask.args
+            // Use the files from the 'installDist' task
+            Sync installDistTask = project.tasks.getByName("installDist") as Sync
+            deploy.outputFile = project.file("${project.buildDir}/packaged/${deploy.name}/${installDistTask.destinationDir.name}")
+            deploy.applicationName = installDistTask.destinationDir.name
+            deploy.sourceDir = installDistTask.destinationDir
+            deploy.sourceFiles.from(project.fileTree(installDistTask.destinationDir).include("**/*.*"))
 
-        // The mainJar is the archive created by the 'jar' task
-        Jar jarTask = project.tasks.named(JavaPlugin.JAR_TASK_NAME, Jar).get()
-        deploy.mainJar = jarTask.archiveFileName
-
-        // Use the files from the 'installDist' task
-        Sync installDistTask = project.tasks.named("installShadowDist", Sync).get()
-        deploy.outputFile = project.file("${project.buildDir}/packaged/${deploy.name}/${installDistTask.destinationDir.name}")
-        deploy.applicationName = installDistTask.destinationDir.name
-        deploy.sourceDir = installDistTask.destinationDir
-        deploy.sourceFiles.from(project.fileTree(installDistTask.destinationDir).include("**/*.*"))
-
-        if (deploy.name == MAIN_DEPLOY_NAME) {
-            project.afterEvaluate {
-                outputTypes.each {
-                    String name = makeTaskName(deploy.name, it)
-                    project.tasks.named(name).configure {
-                        it.dependsOn(installDistTask)
-                    }
+            outputTypes.each {
+                String name = makeTaskName(deploy.name, it)
+                project.tasks.named(name).configure {
+                    it.dependsOn(installDistTask)
                 }
             }
         }
     }
 
     void createJavaPackagerTask(DefaultInstallOptions deploy) {
+        // Wait for evaluation as we require the values of outputTypes
         project.afterEvaluate {
             // Wait for evaluation as we require the values of outputTypes
             List<String> outputTypes = deploy.outputTypes.get()
@@ -162,21 +152,3 @@ class JavaPackagerPlugin implements Plugin<Project> {
     }
 
 }
-
-
-//void configureForDeploy(DefaultInstallOptions deploy, Distribution distribution) {
-//    TaskProvider<Sync> installDistTask
-//    if (distribution.name == DistributionPlugin.MAIN_DISTRIBUTION_NAME) {
-//        installDistTask = project.tasks.named("installDist", Sync.class)
-//
-//        JavaApplication javaApplication = project.extensions.getByType(JavaApplication)
-//        deploy.mainClassName = javaApplication.mainClassName
-//        deploy.javaOptions = javaApplication.applicationDefaultJvmArgs
-//    } else {
-//        installDistTask = project.tasks.named("install" + distribution.name.capitalize() + "Dist", Sync.class)
-//    }
-//
-//    if (installDistTask != null) {
-//        deploy.sourceFiles.from(project.fileTree(installDistTask.get().outputs).include("**/*.*"))
-//    }
-//}
