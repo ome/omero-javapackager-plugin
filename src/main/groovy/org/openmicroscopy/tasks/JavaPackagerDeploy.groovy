@@ -107,7 +107,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
             Collections.addAll(args, "-native", nativeType.get())
         }
 
-        Map bundleArgs = applicationArguments.get()
+        Map<String, String> bundleArgs = applicationArguments.get()
         if (!bundleArgs.isEmpty()) {
             def appArgs = new StringBuilder()
             bundleArgs.each { entry ->
@@ -116,7 +116,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
             args.add("-Barguments=\"" + appArgs.toString().trim() + "\"")
         }
 
-        List jvmOptionsList = jvmOptions.get()
+        List<String> jvmOptionsList = jvmOptions.get()
         if (!jvmOptionsList.isEmpty()) {
             jvmOptionsList.each { String option ->
                 args.add("-BjvmOptions=" + option)
@@ -132,7 +132,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
         }
 
         // Unnamed arguments
-        def unnamedArgs = arguments.get()
+        List<String> unnamedArgs = arguments.get()
         if (!unnamedArgs.isEmpty()) {
             unnamedArgs.each { String argument ->
                 Collections.addAll(args, "-argument", argument)

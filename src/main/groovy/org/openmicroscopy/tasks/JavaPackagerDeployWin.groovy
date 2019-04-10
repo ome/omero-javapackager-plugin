@@ -1,8 +1,6 @@
 package org.openmicroscopy.tasks
 
 import groovy.transform.CompileStatic
-import groovy.transform.TypeChecked
-import groovy.transform.TypeCheckingMode
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -58,23 +56,23 @@ class JavaPackagerDeployWin implements CommandLineArgumentProvider {
         List<String> cmd = []
 
         if (installDirChooser.isPresent()) {
-            cmd.add("-BinstalldirChooser=${installDirChooser.get()}")
+            cmd.add("-BinstalldirChooser=" + installDirChooser.get())
         }
 
         if (addShortcut.isPresent()) {
-            cmd.add("-BshortcutHint=${addShortcut.get()}")
+            cmd.add("-BshortcutHint=" + addShortcut.get())
         }
 
         if (copyright.isPresent()) {
-            cmd.add("-Bcopyright=${copyright.get()}")
+            cmd.add("-Bcopyright=" + copyright.get())
         }
 
         if (startMenuGroup.isPresent()) {
-            cmd.add("-Bwin.menuGroup=${startMenuGroup.get()}")
+            cmd.add("-Bwin.menuGroup=" + startMenuGroup.get())
         }
 
         if (registryVendor.isPresent()) {
-            cmd.add("-Bvendor=${registryVendor.get()}")
+            cmd.add("-Bvendor=" + registryVendor.get())
         }
 
         return cmd
