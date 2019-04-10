@@ -103,12 +103,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
         icon = project.objects.fileProperty()
         outputDir = project.objects.directoryProperty()
         srcDir = project.objects.directoryProperty()
-
-        if (GradleVersion.current() >= GradleVersion.version("5.3")) {
-            this.srcFiles = project.objects.fileCollection()
-        } else {
-            this.srcFiles = project.files()
-        }
+        srcFiles = project.files()
     }
 
     @Override

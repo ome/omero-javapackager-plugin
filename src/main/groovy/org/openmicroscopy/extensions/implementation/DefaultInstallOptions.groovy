@@ -82,12 +82,7 @@ class DefaultInstallOptions implements InstallOptions {
         this.licenseFile = project.objects.fileProperty()
         this.outputFile = project.objects.fileProperty()
         this.sourceDir = project.objects.directoryProperty()
-
-        if (GradleVersion.current() >= GradleVersion.version("5.3")) {
-            this.sourceFiles = project.objects.fileCollection()
-        } else {
-            this.sourceFiles = project.files()
-        }
+        this.sourceFiles = project.files()
     }
 
     Iterable<CommandLineArgumentProvider> createCmdArgProviders(String outputType) {
