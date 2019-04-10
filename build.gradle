@@ -21,8 +21,8 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        jpackager {
-            id = "org.openmicroscopy.jpackager"
+        javapackager {
+            id = "org.openmicroscopy.javapackager"
             implementationClass = "org.openmicroscopy.JavaPackagerPlugin"
         }
     }
