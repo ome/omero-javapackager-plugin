@@ -62,6 +62,10 @@ class WinOptions implements BaseOsOptions {
         this.registryVendor = project.objects.property(String)
         this.startMenuGroup = project.objects.property(String)
         this.icon = project.objects.fileProperty()
+
+        this.addShortcut.convention(true)
+        this.installUserLevel.convention(true)
+        this.installDirChooser.convention(true)
     }
 
     @Override
