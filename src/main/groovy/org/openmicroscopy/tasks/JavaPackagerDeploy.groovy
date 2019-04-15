@@ -39,6 +39,29 @@ import org.gradle.util.GradleVersion
 
 import java.nio.file.Path
 
+/**
+ * Creates task for running javapackager command line tool
+ * <p>
+ * Example:
+ * <pre class='autoTested'>
+ * jar javaPackage(type: Exec) {*
+ *     def argProvider = new JavaPackagerDeploy(getProject())
+ *     argProvider.nativeType.set("dmg")
+ *     argProvider.applicationName.set("OMERO.insight")
+ *     argProvider.outputFileName.set("OMERO.insight")
+ *     argProvider.mainClass.set("org.openmicroscopy.shoola.Main")
+ *     argProvider.outputDir.set(layout.buildDirectory.dir("bundles"))
+ *     argProvider.srcDir.set(layout.buildDirectory.dir("install/omero-insight-shadow"))
+ *     argProvider.icon.set(layout.projectDirectory.file("icons/omeroinsight.icns"))
+ *     argProvider.srcFiles.from(fileTree('build/install/omero-insight-shadow') { include '**\/*.*' })
+ *     argProvider.arguments.add("container.xml")
+ *
+ *     argumentProviders.add(argProvider)
+ *     executable("javapackager")
+ *     args("-deploy")
+ *}* </pre>
+ * <p>
+ */
 @SuppressWarnings("UnstableApiUsage")
 @CompileStatic
 class JavaPackagerDeploy implements CommandLineArgumentProvider {
