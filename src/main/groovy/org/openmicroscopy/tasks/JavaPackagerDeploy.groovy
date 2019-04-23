@@ -35,7 +35,6 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.process.CommandLineArgumentProvider
-import org.gradle.util.GradleVersion
 
 import java.nio.file.Path
 
@@ -80,6 +79,10 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
 
     @Input
     @Optional
+    final Property<String> applicationVersion
+
+    @Input
+    @Optional
     final Property<String> mainJar
 
     @Input
@@ -117,6 +120,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
         nativeType = project.objects.property(String)
         applicationDescription = project.objects.property(String)
         applicationName = project.objects.property(String)
+        applicationVersion = project.objects.property(String)
         mainJar = project.objects.property(String)
         outputFileName = project.objects.property(String)
         mainClass = project.objects.property(String)
@@ -145,6 +149,10 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
             }
         }
 
+        if (applicationVersion.isPresent()) {
+            args.add("appVersion=" + applicationVersion.get())
+        }
+
         if (nativeType.isPresent()) {
             Collections.addAll(args, "-native", nativeType.get())
         }
@@ -168,6 +176,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
         if (applicationName.isPresent()) {
             Collections.addAll(args, "-name", applicationName.get())
         }
+
 
         if (applicationDescription.isPresent()) {
             Collections.addAll(args, "-description", applicationDescription.get())

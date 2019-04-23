@@ -34,7 +34,6 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.process.CommandLineArgumentProvider
-import org.gradle.util.GradleVersion
 import org.openmicroscopy.extensions.BaseOsOptions
 import org.openmicroscopy.extensions.InstallOptions
 import org.openmicroscopy.tasks.JavaPackagerDeploy
@@ -46,6 +45,8 @@ class DefaultInstallOptions implements InstallOptions {
     final Property<String> description
 
     final Property<String> applicationName
+
+    final Property<String> applicationVersion
 
     final Property<String> mainClassName
 
@@ -74,6 +75,7 @@ class DefaultInstallOptions implements InstallOptions {
         this.project = project
         this.description = project.objects.property(String)
         this.applicationName = project.objects.property(String)
+        this.applicationVersion = project.objects.property(String)
         this.mainClassName = project.objects.property(String)
         this.mainJar = project.objects.property(String)
         this.outputTypes = project.objects.listProperty(String)
@@ -100,6 +102,7 @@ class DefaultInstallOptions implements InstallOptions {
         deployCmdProps.arguments.set(arguments)
         deployCmdProps.jvmOptions.set(javaOptions)
         deployCmdProps.applicationName.set(applicationName)
+        deployCmdProps.applicationVersion.set(applicationVersion)
         deployCmdProps.srcDir.set(sourceDir)
         deployCmdProps.srcFiles.from(sourceFiles)
         deployCmdProps.outputDir.set(getOutputDir())
@@ -145,16 +148,36 @@ class DefaultInstallOptions implements InstallOptions {
         executeOsOptionsAction("pkg", action)
     }
 
-    void setApplicationName(Provider<? extends String> name) {
-        this.applicationName.set(name)
-    }
-
     void setApplicationName(String name) {
         this.applicationName.set(name)
     }
 
+    void setApplicationName(Provider<? extends String> name) {
+        this.applicationName.set(name)
+    }
+
+    void setApplicationVersion(String version) {
+        this.applicationVersion.set(version)
+    }
+
+    void setApplicationVersion(Provider<? extends String> version) {
+        this.applicationVersion.set(version)
+    }
+
     void setMainClassName(String mainClass) {
         this.mainClassName.set(mainClass)
+    }
+
+    void setMainClassName(Provider<? extends String> mainClass) {
+        this.mainClassName.set(mainClass)
+    }
+
+    void setMainJar(String name) {
+        this.mainJar.set(name)
+    }
+
+    void setMainJar(Provider<? extends String> name) {
+        this.mainJar.set(name)
     }
 
     void setOutputTypes(String... types) {
@@ -197,14 +220,6 @@ class DefaultInstallOptions implements InstallOptions {
 
     void setSourceDir(Directory dir) {
         this.sourceDir.set(dir)
-    }
-
-    void setMainJar(Provider<? extends String> name) {
-        this.mainJar.set(name)
-    }
-
-    void setMainJar(String name) {
-        this.mainJar.set(name)
     }
 
     void setSourceFiles(Object... files) {
