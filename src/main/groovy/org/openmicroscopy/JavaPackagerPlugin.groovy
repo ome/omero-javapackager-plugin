@@ -80,6 +80,7 @@ class JavaPackagerPlugin implements Plugin<Project> {
     }
 
     void configureForDeploy(DefaultInstallOptions deploy) {
+
         // Default installer types
         final List<String> outputTypes = ["dmg", "exe"]
 

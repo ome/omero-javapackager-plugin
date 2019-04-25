@@ -150,7 +150,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
         }
 
         if (applicationVersion.isPresent()) {
-            args.add("appVersion=" + applicationVersion.get())
+            args.add("-BappVersion=" + applicationVersion.get())
         }
 
         if (nativeType.isPresent()) {
