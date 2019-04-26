@@ -35,10 +35,32 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.process.CommandLineArgumentProvider
-import org.gradle.util.GradleVersion
 
 import java.nio.file.Path
 
+/**
+ * Creates task for running javapackager command line tool
+ * <p>
+ * Example:
+ * <pre class='autoTested'>
+ * jar javaPackage(type: Exec) {*
+ *     def argProvider = new JavaPackagerDeploy(getProject())
+ *     argProvider.nativeType.set("dmg")
+ *     argProvider.applicationName.set("OMERO.insight")
+ *     argProvider.outputFileName.set("OMERO.insight")
+ *     argProvider.mainClass.set("org.openmicroscopy.shoola.Main")
+ *     argProvider.outputDir.set(layout.buildDirectory.dir("bundles"))
+ *     argProvider.srcDir.set(layout.buildDirectory.dir("install/omero-insight-shadow"))
+ *     argProvider.icon.set(layout.projectDirectory.file("icons/omeroinsight.icns"))
+ *     argProvider.srcFiles.from(fileTree('build/install/omero-insight-shadow') { include '**\/*.*' })
+ *     argProvider.arguments.add("container.xml")
+ *
+ *     argumentProviders.add(argProvider)
+ *     executable("javapackager")
+ *     args("-deploy")
+ *}* </pre>
+ * <p>
+ */
 @SuppressWarnings("UnstableApiUsage")
 @CompileStatic
 class JavaPackagerDeploy implements CommandLineArgumentProvider {
@@ -54,6 +76,10 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
     @Input
     @Optional
     final Property<String> applicationName
+
+    @Input
+    @Optional
+    final Property<String> applicationVersion
 
     @Input
     @Optional
@@ -94,6 +120,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
         nativeType = project.objects.property(String)
         applicationDescription = project.objects.property(String)
         applicationName = project.objects.property(String)
+        applicationVersion = project.objects.property(String)
         mainJar = project.objects.property(String)
         outputFileName = project.objects.property(String)
         mainClass = project.objects.property(String)
@@ -122,6 +149,10 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
             }
         }
 
+        if (applicationVersion.isPresent()) {
+            args.add("-BappVersion=" + applicationVersion.get())
+        }
+
         if (nativeType.isPresent()) {
             Collections.addAll(args, "-native", nativeType.get())
         }
@@ -145,6 +176,7 @@ class JavaPackagerDeploy implements CommandLineArgumentProvider {
         if (applicationName.isPresent()) {
             Collections.addAll(args, "-name", applicationName.get())
         }
+
 
         if (applicationDescription.isPresent()) {
             Collections.addAll(args, "-description", applicationDescription.get())

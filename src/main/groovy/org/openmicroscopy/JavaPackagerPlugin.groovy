@@ -80,6 +80,7 @@ class JavaPackagerPlugin implements Plugin<Project> {
     }
 
     void configureForDeploy(DefaultInstallOptions deploy) {
+
         // Default installer types
         final List<String> outputTypes = ["dmg", "exe"]
 
@@ -96,6 +97,7 @@ class JavaPackagerPlugin implements Plugin<Project> {
             // The mainJar is the archive created by the 'jar' task
             def jar = project.tasks.getByName(JavaPlugin.JAR_TASK_NAME) as Jar
             deploy.mainJar = jar.archiveFileName
+            deploy.applicationVersion = jar.archiveVersion
 
             // Use the files from the 'installDist' task
             Sync installDistTask = project.tasks.getByName("installDist") as Sync
