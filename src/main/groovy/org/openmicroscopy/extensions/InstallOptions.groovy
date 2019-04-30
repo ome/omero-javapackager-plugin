@@ -23,14 +23,17 @@ package org.openmicroscopy.extensions
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.Named
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
-import org.gradle.api.file.FileCollection
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.openmicroscopy.Extensible
 import org.openmicroscopy.extensions.implementation.MacOptions
 import org.openmicroscopy.extensions.implementation.WinOptions
-
 
 @CompileStatic
 interface InstallOptions extends Named, Extensible {
@@ -39,67 +42,218 @@ interface InstallOptions extends Named, Extensible {
      * Description of the application
      * @return
      */
-    Provider<String> getDescription()
+    Property<String> getDescription()
+
+    /**
+     *
+     * @param description
+     */
+    void setApplicationDescription(String description)
 
     /**
      * Name of the application and/or installer
      * @return
      */
-    Provider<String> getApplicationName()
+    Property<String> getApplicationName()
+
+    /**
+     *
+     * @param name
+     */
+    void setApplicationName(String name)
+
+    /**
+     *
+     * @param name
+     */
+    void setApplicationName(Provider<? extends String> name)
+
+    /**
+     * Sets the version string on the installer file name
+     * @return
+     */
+    Property<String> getApplicationVersion()
+
+    /**
+     *
+     * @param version
+     */
+    void setApplicationVersion(String version)
+
+    /**
+     *
+     * @param version
+     */
+    void setApplicationVersion(Provider<? extends String> version)
 
     /**
      * Qualified name of the application main class to execute.
      * @return
      */
-    Provider<String> getMainClassName()
+    Property<String> getMainClassName()
+
+    /**
+     *
+     * @param mainClass
+     */
+    void setMainClassName(String mainClass)
+
+    /**
+     *
+     * @param mainClass
+     */
+    void setMainClassName(Provider<? extends String> mainClass)
 
     /**
      * The name of the main JAR of the application.
      * containing the main class (specified as a path relative to {@code getSourceDir).
      * @return
      */
-    Provider<String> getMainJar()
+    Property<String> getMainJar()
 
     /**
-     * List of types of the installer to create. Valid values are: {"exe", "msi", "rpm", "deb", "pkg", "dmg"}.
+     *
+     * @param name
+     */
+    void setMainJar(String name)
+
+    /**
+     *
+     * @param name
+     */
+    void setMainJar(Provider<? extends String> name)
+
+    /**
+     * List of types of the installer to create.
      * @return
      */
     Provider<List<String>> getOutputTypes()
 
     /**
+     * Valid values are: {"exe", "msi", "rpm", "deb", "pkg", "dmg"}.
+     * @param types
+     */
+    void setOutputTypes(String... types)
+
+    /**
+     * Valid values are: {"exe", "msi", "rpm", "deb", "pkg", "dmg"}.
+     * @param types
+     */
+    void setOutputTypes(Iterable<? extends String> types)
+
+    /**
      * Command line arguments to pass to the main class if no command line arguments are given to the launcher
      * @return
      */
-    Provider<List<String>> getArguments()
+    ListProperty<String> getArguments()
+
+    /**
+     * Set unnamed java command line arguments
+     * @param args
+     */
+    void setArguments(Iterable<? extends String> args)
 
     /**
      * Options to pass to the Java runtime
      * @return
      */
-    Provider<List<String>> getJavaOptions()
+    ListProperty<String> getJavaOptions()
+
+    /**
+     *
+     * @param options
+     */
+    void setJavaOptions(Iterable<? extends String> options)
 
     /**
      * Location of the End User License Agreement (EULA) to be presented or recorded by the bundler.
      * @return RegularFile object
      */
-    Provider<RegularFile> getLicenseFile()
+    RegularFileProperty getLicenseFile()
 
     /**
      * File to be created by packager tooll
      * @return RegularFile object
      */
-    Provider<RegularFile> getOutputFile()
+    RegularFileProperty getOutputFile()
 
-    Provider<Directory> getSourceDir()
+    /**
+     *
+     * @param file
+     */
+    void setOutputFile(RegularFile file)
 
-    FileCollection getSourceFiles()
+    /**
+     *
+     * @param file
+     */
+    void setOutputFile(File file)
 
+    /**
+     *
+     * @param file
+     */
+    void setOutputFile(String file)
+
+    /**
+     * Base directory of the files to package.
+     * @return DirectoryProperty
+     */
+    DirectoryProperty getSourceDir()
+
+    /**
+     *
+     * @param dir
+     */
+    void setSourceDir(File dir)
+
+    /**
+     *
+     * @param dir
+     */
+    void setSourceDir(Directory dir)
+
+    /**
+     * List of files in the directory specified by the -srcdir option.
+     * If omitted, all files in the directory (which is a mandatory argument in this case) will be used.
+     * @return ConfigurableFileCollection
+     */
+    ConfigurableFileCollection getSourceFiles()
+
+    /**
+     *
+     * @param files
+     */
+    void setSourceFiles(Object... files)
+
+    /**
+     *
+     * @param files
+     */
+    void setSourceFiles(Iterable<?> files)
+
+    /**
+     * Configure execuable specific options for javapackager (Windows only)
+     * @param action
+     */
     void exe(Action<? super WinOptions> action)
 
+    /**
+     * Configure msi specific options for javapackager (Windows only)
+     * @param action
+     */
     void msi(Action<? super WinOptions> action)
 
+    /**
+     * Configure dmg specific options for javapackager (Mac only)
+     * @param action
+     */
     void dmg(Action<? super MacOptions> action)
 
+    /**
+     * Configure pkg specific options for javapackager (Mac only)
+     * @param action
+     */
     void pkg(Action<? super MacOptions> action)
 
 }

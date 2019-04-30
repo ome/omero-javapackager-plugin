@@ -118,6 +118,137 @@ class DefaultInstallOptions implements InstallOptions {
         return name
     }
 
+    @Override
+    void setApplicationDescription(String description) {
+        this.description.set(description)
+    }
+
+    @Override
+    void setApplicationName(String name) {
+        this.applicationName.set(name)
+    }
+
+    @Override
+    void setApplicationName(Provider<? extends String> name) {
+        this.applicationName.set(name)
+    }
+
+    @Override
+    void setApplicationVersion(String version) {
+        this.applicationVersion.set(version)
+    }
+
+    @Override
+    void setApplicationVersion(Provider<? extends String> version) {
+        this.applicationVersion.set(version)
+    }
+
+    @Override
+    void setMainClassName(String mainClass) {
+        this.mainClassName.set(mainClass)
+    }
+
+    @Override
+    void setMainClassName(Provider<? extends String> mainClass) {
+        this.mainClassName.set(mainClass)
+    }
+
+    @Override
+    void setMainJar(String name) {
+        this.mainJar.set(name)
+    }
+
+    @Override
+    void setMainJar(Provider<? extends String> name) {
+        this.mainJar.set(name)
+    }
+
+    @Override
+    void setOutputTypes(String... types) {
+        this.setOutputTypes(types.toList())
+    }
+
+    @Override
+    void setOutputTypes(Iterable<? extends String> types) {
+        if (!(this instanceof ExtensionAware)) {
+            throw new GradleException("DefaultInstallOptions is not extension aware")
+        }
+
+        this.outputTypes.set(types)
+
+        types.each { String type ->
+            def extThis = this as ExtensionAware
+            if (!extThis.extensions.findByName(type)) {
+                addExtension(extThis, type)
+            }
+        }
+    }
+
+    @Override
+    void setArguments(Iterable<? extends String> args) {
+        this.arguments.set(args)
+    }
+
+    @Override
+    void setJavaOptions(Iterable<? extends String> options) {
+        this.javaOptions.set(options)
+    }
+
+    @Override
+    void setOutputFile(RegularFile file) {
+        this.outputFile.set(file)
+    }
+
+    @Override
+    void setOutputFile(File file) {
+        this.outputFile.set(file)
+    }
+
+    @Override
+    void setOutputFile(String file) {
+        this.setOutputFile(project.file(file))
+    }
+
+    @Override
+    void setSourceDir(File dir) {
+        this.sourceDir.set(dir)
+    }
+
+    @Override
+    void setSourceDir(Directory dir) {
+        this.sourceDir.set(dir)
+    }
+
+    @Override
+    void setSourceFiles(Object... files) {
+        this.sourceFiles.setFrom(files)
+    }
+
+    @Override
+    void setSourceFiles(Iterable<?> files) {
+        this.sourceFiles.setFrom(files)
+    }
+
+    @Override
+    void exe(Action<? super WinOptions> action) {
+        executeOsOptionsAction("exe", action)
+    }
+
+    @Override
+    void msi(Action<? super WinOptions> action) {
+        executeOsOptionsAction("msi", action)
+    }
+
+    @Override
+    void dmg(Action<? super MacOptions> action) {
+        executeOsOptionsAction("dmg", action)
+    }
+
+    @Override
+    void pkg(Action<? super MacOptions> action) {
+        executeOsOptionsAction("pkg", action)
+    }
+
     Provider<Directory> getOutputDir() {
         return this.outputFile.flatMap { RegularFile regularFile ->
             DirectoryProperty property = project.objects.directoryProperty()
@@ -130,104 +261,6 @@ class DefaultInstallOptions implements InstallOptions {
         return this.outputFile.map { RegularFile regularFile ->
             regularFile.asFile.name
         }
-    }
-
-    void exe(Action<? super WinOptions> action) {
-        executeOsOptionsAction("exe", action)
-    }
-
-    void msi(Action<? super WinOptions> action) {
-        executeOsOptionsAction("msi", action)
-    }
-
-    void dmg(Action<? super MacOptions> action) {
-        executeOsOptionsAction("dmg", action)
-    }
-
-    void pkg(Action<? super MacOptions> action) {
-        executeOsOptionsAction("pkg", action)
-    }
-
-    void setApplicationName(String name) {
-        this.applicationName.set(name)
-    }
-
-    void setApplicationName(Provider<? extends String> name) {
-        this.applicationName.set(name)
-    }
-
-    void setApplicationVersion(String version) {
-        this.applicationVersion.set(version)
-    }
-
-    void setApplicationVersion(Provider<? extends String> version) {
-        this.applicationVersion.set(version)
-    }
-
-    void setMainClassName(String mainClass) {
-        this.mainClassName.set(mainClass)
-    }
-
-    void setMainClassName(Provider<? extends String> mainClass) {
-        this.mainClassName.set(mainClass)
-    }
-
-    void setMainJar(String name) {
-        this.mainJar.set(name)
-    }
-
-    void setMainJar(Provider<? extends String> name) {
-        this.mainJar.set(name)
-    }
-
-    void setOutputTypes(String... types) {
-        this.setOutputTypes(types.toList())
-    }
-
-    void setOutputTypes(Iterable<? extends String> types) {
-        this.outputTypes.set(types)
-        if (!(this instanceof ExtensionAware)) {
-            return
-        }
-
-        def extThis = this as ExtensionAware
-        types.each { String type ->
-            if (!extThis.extensions.findByName(type)) {
-                addExtension(extThis, type)
-            }
-        }
-    }
-
-    void setArguments(Iterable<? extends String> args) {
-        this.arguments.set(args)
-    }
-
-    void setJavaOptions(Iterable<? extends String> options) {
-        this.javaOptions.set(options)
-    }
-
-    void setOutputFile(RegularFile file) {
-        this.outputFile.set(file)
-    }
-
-    void setOutputFile(File file) {
-        this.outputFile.set(file)
-    }
-
-    void setSourceDir(File dir) {
-        this.sourceDir.set(dir)
-    }
-
-    void setSourceDir(Directory dir) {
-        this.sourceDir.set(dir)
-    }
-
-    void setSourceFiles(Object... files) {
-        this.sourceFiles.setFrom(files)
-    }
-
-    void setSourceFiles(Iterable<?> files) {
-        this.sourceFiles.setFrom(files)
     }
 
     private <T> void executeOsOptionsAction(String methodName, Action<T> action) {

@@ -32,6 +32,7 @@ import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Sync
 import org.gradle.internal.reflect.Instantiator
 import org.gradle.jvm.tasks.Jar
+import org.openmicroscopy.extensions.InstallOptions
 import org.openmicroscopy.extensions.InstallOptionsContainer
 import org.openmicroscopy.extensions.implementation.DefaultInstallOptions
 import org.openmicroscopy.extensions.implementation.DefaultInstallOptionsContainer
@@ -65,24 +66,23 @@ class JavaPackagerPlugin implements Plugin<Project> {
         project.pluginManager.apply(ApplicationPlugin)
 
         InstallOptionsContainer deployContainer = project.extensions.create(InstallOptionsContainer, "deploy",
-                DefaultInstallOptionsContainer, DefaultInstallOptions, instantiator, callbackActionDecorator, project)
+                DefaultInstallOptionsContainer, InstallOptions, instantiator, callbackActionDecorator, project)
 
-        deployContainer.all { DefaultInstallOptions deployExt ->
+        deployContainer.configureEach { DefaultInstallOptions deployExt ->
             createJavaPackagerTask(deployExt)
         }
 
-        deployContainer.create(MAIN_DEPLOY_NAME, new Action<DefaultInstallOptions>() {
+        deployContainer.create(MAIN_DEPLOY_NAME, new Action<InstallOptions>() {
             @Override
-            void execute(DefaultInstallOptions opts) {
+            void execute(InstallOptions opts) {
                 configureForDeploy(opts)
             }
         })
     }
 
-    void configureForDeploy(DefaultInstallOptions deploy) {
-
+    void configureForDeploy(InstallOptions deploy) {
         // Default installer types
-        final List<String> outputTypes = ["dmg", "exe"]
+        final List<String> outputTypes = ["dmg", "pkg", "exe", "msi"]
 
         // Set the default package types
         deploy.outputTypes = outputTypes
@@ -100,8 +100,8 @@ class JavaPackagerPlugin implements Plugin<Project> {
             deploy.applicationVersion = jar.archiveVersion
 
             // Use the files from the 'installDist' task
-            Sync installDistTask = project.tasks.getByName("installDist") as Sync
-            deploy.outputFile = project.file("${project.buildDir}/packaged/${deploy.name}/${installDistTask.destinationDir.name}")
+            def installDistTask = project.tasks.getByName("installDist") as Sync
+            deploy.outputFile = "${project.buildDir}/packaged/${deploy.name}/${installDistTask.destinationDir.name}"
             deploy.applicationName = installDistTask.destinationDir.name
             deploy.sourceDir = installDistTask.destinationDir
             deploy.sourceFiles.from(project.fileTree(installDistTask.destinationDir).include("**/*.*"))
