@@ -24,6 +24,7 @@ import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.internal.CollectionCallbackActionDecorator
 import org.gradle.api.plugins.ApplicationPlugin
 import org.gradle.api.plugins.JavaPlugin
@@ -50,11 +51,13 @@ class JavaPackagerPlugin implements Plugin<Project> {
 
     private Project project
 
+    private final ProjectLayout layout
     private final Instantiator instantiator
     private final CollectionCallbackActionDecorator callbackActionDecorator
 
     @Inject
-    JavaPackagerPlugin(Instantiator instantiator, CollectionCallbackActionDecorator callbackActionDecorator) {
+    JavaPackagerPlugin(ProjectLayout layout, Instantiator instantiator, CollectionCallbackActionDecorator callbackActionDecorator) {
+        this.layout = layout
         this.instantiator = instantiator
         this.callbackActionDecorator = callbackActionDecorator
     }
@@ -65,22 +68,24 @@ class JavaPackagerPlugin implements Plugin<Project> {
 
         project.pluginManager.apply(ApplicationPlugin)
 
-        InstallOptionsContainer deployContainer = project.extensions.create(InstallOptionsContainer, "deploy",
-                DefaultInstallOptionsContainer, InstallOptions, instantiator, callbackActionDecorator, project)
+        InstallOptionsContainer deployContainer =
+                project.extensions.create(InstallOptionsContainer, "deploy", DefaultInstallOptionsContainer,
+                        InstallOptions, instantiator, callbackActionDecorator, project)
 
-        deployContainer.configureEach { DefaultInstallOptions deployExt ->
-            createJavaPackagerTask(deployExt)
+        deployContainer.configureEach { InstallOptions options ->
+            if (options instanceof DefaultInstallOptions) {
+                createJavaPackagerTask(options)
+            }
+
+            if (options.name == MAIN_DEPLOY_NAME) {
+                configureMain(options)
+            }
         }
 
-        deployContainer.create(MAIN_DEPLOY_NAME, new Action<InstallOptions>() {
-            @Override
-            void execute(InstallOptions opts) {
-                configureForDeploy(opts)
-            }
-        })
+        deployContainer.create(MAIN_DEPLOY_NAME)
     }
 
-    void configureForDeploy(InstallOptions deploy) {
+    void configureMain(InstallOptions deploy) {
         // Default installer types
         final List<String> outputTypes = ["dmg", "pkg", "exe", "msi"]
 
@@ -90,20 +95,20 @@ class JavaPackagerPlugin implements Plugin<Project> {
         project.afterEvaluate {
             // Use the command line arguments from the 'run' task
             def exec = project.tasks.getByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
-            deploy.mainClassName = exec.main
-            deploy.arguments = exec.args
-            deploy.javaOptions = exec.jvmArgs
+            deploy.mainClassName.convention(exec.main)
+            deploy.arguments.convention(exec.args)
+            deploy.javaOptions.convention(exec.jvmArgs)
 
             // The mainJar is the archive created by the 'jar' task
             def jar = project.tasks.getByName(JavaPlugin.JAR_TASK_NAME) as Jar
-            deploy.mainJar = jar.archiveFileName
-            deploy.applicationVersion = jar.archiveVersion
+            deploy.mainJar.convention(jar.archiveFileName)
+            deploy.applicationVersion.convention(jar.archiveVersion)
 
             // Use the files from the 'installDist' task
             def installDistTask = project.tasks.getByName("installDist") as Sync
-            deploy.outputFile = "${project.buildDir}/packaged/${deploy.name}/${installDistTask.destinationDir.name}"
-            deploy.applicationName = installDistTask.destinationDir.name
-            deploy.sourceDir = installDistTask.destinationDir
+            deploy.applicationName.convention(installDistTask.destinationDir.name)
+            deploy.outputFile.convention(layout.buildDirectory.file("packaged/${deploy.name}/${installDistTask.destinationDir.name}"))
+            deploy.sourceDir.convention(layout.projectDirectory.dir(installDistTask.destinationDir.toString()))
             deploy.sourceFiles.from(project.fileTree(installDistTask.destinationDir).include("**/*.*"))
 
             outputTypes.each {
@@ -141,11 +146,11 @@ class JavaPackagerPlugin implements Plugin<Project> {
      * Create a task name e.g. 'packageMatlabApplicationDmg' or 'packageMatlabApplicationExe'
      *
      * Default name when using 'main' as an install option is 'packageApplication(Dmg, Exe, etc)'
-     * @param configName
-     * @param outputType
+     * @param configName deploy configuration name
+     * @param outputType possible output types [exe, msi, dmg, pkg]
      * @return
      */
-    String makeTaskName(String configName, String outputType) {
+    static String makeTaskName(String configName, String outputType) {
         String taskName = PACKAGE_APPLICATION_TASK_NAME + outputType.capitalize()
         if (configName != MAIN_DEPLOY_NAME) {
             taskName = "package" + configName.capitalize() + "Application" + outputType.capitalize()
