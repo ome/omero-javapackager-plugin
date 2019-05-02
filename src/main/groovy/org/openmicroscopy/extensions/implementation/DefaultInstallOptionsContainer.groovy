@@ -34,14 +34,14 @@ class DefaultInstallOptionsContainer extends AbstractNamedDomainObjectContainer<
 
     private final Project project
 
-    DefaultInstallOptionsContainer(Class<DefaultInstallOptions> type, Instantiator instantiator,
+    DefaultInstallOptionsContainer(Class<InstallOptions> type, Instantiator instantiator,
                                    CollectionCallbackActionDecorator callbackDecorator, Project project) {
         super(type, instantiator, callbackDecorator)
         this.project = project
     }
 
     @Override
-    protected DefaultInstallOptions doCreate(String name) {
+    protected InstallOptions doCreate(String name) {
         return getInstantiator().newInstance(DefaultInstallOptions, name, project)
     }
 
