@@ -31,7 +31,6 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.openmicroscopy.Extensible
 import org.openmicroscopy.extensions.implementation.MacOptions
 import org.openmicroscopy.extensions.implementation.WinOptions
 
@@ -164,6 +163,31 @@ interface InstallOptions extends Named, Extensible {
      * @param options
      */
     void setJavaOptions(Iterable<? extends String> options)
+
+
+    /**
+     *
+     * @return
+     */
+    Provider<RegularFile> getIcon()
+
+    /**
+     *
+     * @param icon
+     */
+    void setIcon(RegularFileProperty icon)
+
+    /**
+     *
+     * @param icon
+     */
+    void setIcon(File icon)
+
+    /**
+     *
+     * @param icon
+     */
+    void setIcon(String icon)
 
     /**
      * Location of the End User License Agreement (EULA) to be presented or recorded by the bundler.

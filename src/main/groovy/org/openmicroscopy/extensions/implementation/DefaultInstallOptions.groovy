@@ -21,6 +21,7 @@
 package org.openmicroscopy.extensions.implementation
 
 import groovy.transform.CompileStatic
+import org.apache.commons.io.FilenameUtils
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -34,6 +35,7 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.process.CommandLineArgumentProvider
+import org.openmicroscopy.Platform
 import org.openmicroscopy.extensions.BaseOsOptions
 import org.openmicroscopy.extensions.InstallOptions
 import org.openmicroscopy.tasks.JavaPackagerDeploy
@@ -58,6 +60,8 @@ class DefaultInstallOptions implements InstallOptions {
 
     final ListProperty<String> javaOptions
 
+    final RegularFileProperty icon
+
     final RegularFileProperty licenseFile
 
     final RegularFileProperty outputFile
@@ -81,6 +85,7 @@ class DefaultInstallOptions implements InstallOptions {
         this.outputTypes = project.objects.listProperty(String)
         this.arguments = project.objects.listProperty(String)
         this.javaOptions = project.objects.listProperty(String)
+        this.icon = project.objects.fileProperty()
         this.licenseFile = project.objects.fileProperty()
         this.outputFile = project.objects.fileProperty()
         this.sourceDir = project.objects.directoryProperty()
@@ -91,9 +96,8 @@ class DefaultInstallOptions implements InstallOptions {
         List<CommandLineArgumentProvider> cmdArgProviders = []
 
         BaseOsOptions osOptions = extensionContainer.getByName(outputType) as BaseOsOptions
-        cmdArgProviders.add(osOptions.createCmdArgsProvider())
+        osOptions.icon.convention(icon)
 
-        // Add self
         JavaPackagerDeploy deployCmdProps = new JavaPackagerDeploy(project)
         deployCmdProps.nativeType.set(outputType)
         deployCmdProps.icon.set(osOptions.icon)
@@ -109,6 +113,7 @@ class DefaultInstallOptions implements InstallOptions {
         deployCmdProps.outputFileName.set(getOutputFileName())
 
         // Add general command line arguments
+        cmdArgProviders.add(osOptions.createCmdArgsProvider())
         cmdArgProviders.add(deployCmdProps)
         cmdArgProviders
     }
@@ -195,6 +200,25 @@ class DefaultInstallOptions implements InstallOptions {
     }
 
     @Override
+    void setIcon(RegularFileProperty icon) {
+        this.icon.set(icon.flatMap {
+            RegularFileProperty normalisedIcon = project.objects.fileProperty()
+            normalisedIcon.set(icon)
+            normalisedIcon
+        })
+    }
+
+    @Override
+    void setIcon(File icon) {
+        this.icon.set(normaliseIcon(icon))
+    }
+
+    @Override
+    void setIcon(String icon) {
+        this.setIcon(new File(icon))
+    }
+
+    @Override
     void setOutputFile(RegularFile file) {
         this.outputFile.set(file)
     }
@@ -261,6 +285,10 @@ class DefaultInstallOptions implements InstallOptions {
         return this.outputFile.map { RegularFile regularFile ->
             regularFile.asFile.name
         }
+    }
+
+    private File normaliseIcon(File icon) {
+        return new File(icon.parent, FilenameUtils.getBaseName(icon.name) + "." + Platform.iconExtension)
     }
 
     private <T> void executeOsOptionsAction(String methodName, Action<T> action) {

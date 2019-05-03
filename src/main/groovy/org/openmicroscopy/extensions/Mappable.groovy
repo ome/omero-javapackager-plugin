@@ -18,7 +18,7 @@
  *
  * ------------------------------------------------------------------------------
  */
-package org.openmicroscopy
+package org.openmicroscopy.extensions
 
 // https://codereview.stackexchange.com/a/139436
 trait Mappable {

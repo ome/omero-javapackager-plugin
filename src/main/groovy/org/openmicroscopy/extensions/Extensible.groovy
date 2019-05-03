@@ -18,7 +18,7 @@
  *
  * ------------------------------------------------------------------------------
  */
-package org.openmicroscopy
+package org.openmicroscopy.extensions
 
 import groovy.transform.CompileStatic
 import org.gradle.api.plugins.ExtensionAware

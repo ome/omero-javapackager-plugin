@@ -27,9 +27,9 @@ import org.gradle.api.Project
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.internal.CollectionCallbackActionDecorator
 import org.gradle.api.plugins.ApplicationPlugin
+import org.gradle.api.plugins.JavaApplication
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Exec
-import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Sync
 import org.gradle.internal.reflect.Instantiator
 import org.gradle.jvm.tasks.Jar
@@ -87,25 +87,23 @@ class JavaPackagerPlugin implements Plugin<Project> {
 
     void configureMain(InstallOptions deploy) {
         // Default installer types
-        final List<String> outputTypes = ["dmg", "pkg", "exe", "msi"]
+        final List<String> outputTypes = Platform.installerTypesAsString
 
         // Set the default package types
         deploy.outputTypes = outputTypes
 
         project.afterEvaluate {
-            // Use the command line arguments from the 'run' task
-            def exec = project.tasks.getByName(ApplicationPlugin.TASK_RUN_NAME) as JavaExec
-            deploy.mainClassName.convention(exec.main)
-            deploy.arguments.convention(exec.args)
-            deploy.javaOptions.convention(exec.jvmArgs)
+            JavaApplication javaApplication = project.extensions.getByType(JavaApplication)
+            deploy.mainClassName.convention(javaApplication.mainClassName)
+            deploy.javaOptions.convention(javaApplication.applicationDefaultJvmArgs)
 
             // The mainJar is the archive created by the 'jar' task
-            def jar = project.tasks.getByName(JavaPlugin.JAR_TASK_NAME) as Jar
+            Jar jar = project.tasks.getByName(JavaPlugin.JAR_TASK_NAME) as Jar
             deploy.mainJar.convention(jar.archiveFileName)
             deploy.applicationVersion.convention(jar.archiveVersion)
 
             // Use the files from the 'installDist' task
-            def installDistTask = project.tasks.getByName("installDist") as Sync
+            Sync installDistTask = project.tasks.getByName("installDist") as Sync
             deploy.applicationName.convention(installDistTask.destinationDir.name)
             deploy.outputFile.convention(layout.buildDirectory.file("packaged/${deploy.name}/${installDistTask.destinationDir.name}"))
             deploy.sourceDir.convention(layout.projectDirectory.dir(installDistTask.destinationDir.toString()))
