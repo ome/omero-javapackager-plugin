@@ -20,6 +20,9 @@
  */
 package org.openmicroscopy
 
+import groovy.transform.CompileStatic
+
+@CompileStatic
 enum InstallerType {
     EXE("exe"),
     MSI("msi"),
@@ -30,5 +33,9 @@ enum InstallerType {
 
     InstallerType(String type) {
         this.type = type
+    }
+
+    String getType() {
+        return type
     }
 }

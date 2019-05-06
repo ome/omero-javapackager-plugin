@@ -43,7 +43,7 @@ import java.nio.file.Path
  * <p>
  * Example:
  * <pre class='autoTested'>
- * jar javaPackage(type: Exec) {*
+ * jar javaPackage(type: Exec) {
  *     def argProvider = new JavaPackagerDeploy(getProject())
  *     argProvider.nativeType.set("dmg")
  *     argProvider.applicationName.set("OMERO.insight")
@@ -58,7 +58,7 @@ import java.nio.file.Path
  *     argumentProviders.add(argProvider)
  *     executable("javapackager")
  *     args("-deploy")
- *}* </pre>
+ *} </pre>
  * <p>
  */
 @SuppressWarnings("UnstableApiUsage")

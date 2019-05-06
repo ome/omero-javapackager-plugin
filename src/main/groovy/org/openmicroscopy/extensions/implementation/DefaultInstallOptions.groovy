@@ -21,6 +21,7 @@
 package org.openmicroscopy.extensions.implementation
 
 import groovy.transform.CompileStatic
+import org.apache.commons.io.FilenameUtils
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -34,6 +35,7 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.process.CommandLineArgumentProvider
+import org.openmicroscopy.Platform
 import org.openmicroscopy.extensions.BaseOsOptions
 import org.openmicroscopy.extensions.InstallOptions
 import org.openmicroscopy.tasks.JavaPackagerDeploy
@@ -58,6 +60,8 @@ class DefaultInstallOptions implements InstallOptions {
 
     final ListProperty<String> javaOptions
 
+    final RegularFileProperty icon
+
     final RegularFileProperty licenseFile
 
     final RegularFileProperty outputFile
@@ -81,6 +85,7 @@ class DefaultInstallOptions implements InstallOptions {
         this.outputTypes = project.objects.listProperty(String)
         this.arguments = project.objects.listProperty(String)
         this.javaOptions = project.objects.listProperty(String)
+        this.icon = project.objects.fileProperty()
         this.licenseFile = project.objects.fileProperty()
         this.outputFile = project.objects.fileProperty()
         this.sourceDir = project.objects.directoryProperty()
@@ -91,9 +96,8 @@ class DefaultInstallOptions implements InstallOptions {
         List<CommandLineArgumentProvider> cmdArgProviders = []
 
         BaseOsOptions osOptions = extensionContainer.getByName(outputType) as BaseOsOptions
-        cmdArgProviders.add(osOptions.createCmdArgsProvider())
+        osOptions.icon.convention(icon)
 
-        // Add self
         JavaPackagerDeploy deployCmdProps = new JavaPackagerDeploy(project)
         deployCmdProps.nativeType.set(outputType)
         deployCmdProps.icon.set(osOptions.icon)
@@ -109,6 +113,7 @@ class DefaultInstallOptions implements InstallOptions {
         deployCmdProps.outputFileName.set(getOutputFileName())
 
         // Add general command line arguments
+        cmdArgProviders.add(osOptions.createCmdArgsProvider())
         cmdArgProviders.add(deployCmdProps)
         cmdArgProviders
     }
@@ -116,6 +121,156 @@ class DefaultInstallOptions implements InstallOptions {
     @Override
     String getName() {
         return name
+    }
+
+    @Override
+    void setApplicationDescription(String description) {
+        this.description.set(description)
+    }
+
+    @Override
+    void setApplicationName(String name) {
+        this.applicationName.set(name)
+    }
+
+    @Override
+    void setApplicationName(Provider<? extends String> name) {
+        this.applicationName.set(name)
+    }
+
+    @Override
+    void setApplicationVersion(String version) {
+        this.applicationVersion.set(version)
+    }
+
+    @Override
+    void setApplicationVersion(Provider<? extends String> version) {
+        this.applicationVersion.set(version)
+    }
+
+    @Override
+    void setMainClassName(String mainClass) {
+        this.mainClassName.set(mainClass)
+    }
+
+    @Override
+    void setMainClassName(Provider<? extends String> mainClass) {
+        this.mainClassName.set(mainClass)
+    }
+
+    @Override
+    void setMainJar(String name) {
+        this.mainJar.set(name)
+    }
+
+    @Override
+    void setMainJar(Provider<? extends String> name) {
+        this.mainJar.set(name)
+    }
+
+    @Override
+    void setOutputTypes(String... types) {
+        this.setOutputTypes(types.toList())
+    }
+
+    @Override
+    void setOutputTypes(Iterable<? extends String> types) {
+        if (!(this instanceof ExtensionAware)) {
+            throw new GradleException("DefaultInstallOptions is not extension aware")
+        }
+
+        this.outputTypes.set(types)
+
+        types.each { String type ->
+            def extThis = this as ExtensionAware
+            if (!extThis.extensions.findByName(type)) {
+                addExtension(extThis, type)
+            }
+        }
+    }
+
+    @Override
+    void setArguments(Iterable<? extends String> args) {
+        this.arguments.set(args)
+    }
+
+    @Override
+    void setJavaOptions(Iterable<? extends String> options) {
+        this.javaOptions.set(options)
+    }
+
+    @Override
+    void setIcon(RegularFileProperty icon) {
+        this.icon.set(icon.flatMap {
+            RegularFileProperty normalisedIcon = project.objects.fileProperty()
+            normalisedIcon.set(icon)
+            normalisedIcon
+        })
+    }
+
+    @Override
+    void setIcon(File icon) {
+        this.icon.set(normaliseIcon(icon))
+    }
+
+    @Override
+    void setIcon(String icon) {
+        this.setIcon(new File(icon))
+    }
+
+    @Override
+    void setOutputFile(RegularFile file) {
+        this.outputFile.set(file)
+    }
+
+    @Override
+    void setOutputFile(File file) {
+        this.outputFile.set(file)
+    }
+
+    @Override
+    void setOutputFile(String file) {
+        this.setOutputFile(project.file(file))
+    }
+
+    @Override
+    void setSourceDir(File dir) {
+        this.sourceDir.set(dir)
+    }
+
+    @Override
+    void setSourceDir(Directory dir) {
+        this.sourceDir.set(dir)
+    }
+
+    @Override
+    void setSourceFiles(Object... files) {
+        this.sourceFiles.setFrom(files)
+    }
+
+    @Override
+    void setSourceFiles(Iterable<?> files) {
+        this.sourceFiles.setFrom(files)
+    }
+
+    @Override
+    void exe(Action<? super WinOptions> action) {
+        executeOsOptionsAction("exe", action)
+    }
+
+    @Override
+    void msi(Action<? super WinOptions> action) {
+        executeOsOptionsAction("msi", action)
+    }
+
+    @Override
+    void dmg(Action<? super MacOptions> action) {
+        executeOsOptionsAction("dmg", action)
+    }
+
+    @Override
+    void pkg(Action<? super MacOptions> action) {
+        executeOsOptionsAction("pkg", action)
     }
 
     Provider<Directory> getOutputDir() {
@@ -132,102 +287,8 @@ class DefaultInstallOptions implements InstallOptions {
         }
     }
 
-    void exe(Action<? super WinOptions> action) {
-        executeOsOptionsAction("exe", action)
-    }
-
-    void msi(Action<? super WinOptions> action) {
-        executeOsOptionsAction("msi", action)
-    }
-
-    void dmg(Action<? super MacOptions> action) {
-        executeOsOptionsAction("dmg", action)
-    }
-
-    void pkg(Action<? super MacOptions> action) {
-        executeOsOptionsAction("pkg", action)
-    }
-
-    void setApplicationName(String name) {
-        this.applicationName.set(name)
-    }
-
-    void setApplicationName(Provider<? extends String> name) {
-        this.applicationName.set(name)
-    }
-
-    void setApplicationVersion(String version) {
-        this.applicationVersion.set(version)
-    }
-
-    void setApplicationVersion(Provider<? extends String> version) {
-        this.applicationVersion.set(version)
-    }
-
-    void setMainClassName(String mainClass) {
-        this.mainClassName.set(mainClass)
-    }
-
-    void setMainClassName(Provider<? extends String> mainClass) {
-        this.mainClassName.set(mainClass)
-    }
-
-    void setMainJar(String name) {
-        this.mainJar.set(name)
-    }
-
-    void setMainJar(Provider<? extends String> name) {
-        this.mainJar.set(name)
-    }
-
-    void setOutputTypes(String... types) {
-        this.setOutputTypes(types.toList())
-    }
-
-    void setOutputTypes(Iterable<? extends String> types) {
-        this.outputTypes.set(types)
-        if (!(this instanceof ExtensionAware)) {
-            return
-        }
-
-        def extThis = this as ExtensionAware
-        types.each { String type ->
-            if (!extThis.extensions.findByName(type)) {
-                addExtension(extThis, type)
-            }
-        }
-    }
-
-    void setArguments(Iterable<? extends String> args) {
-        this.arguments.set(args)
-    }
-
-    void setJavaOptions(Iterable<? extends String> options) {
-        this.javaOptions.set(options)
-    }
-
-    void setOutputFile(RegularFile file) {
-        this.outputFile.set(file)
-    }
-
-    void setOutputFile(File file) {
-        this.outputFile.set(file)
-    }
-
-    void setSourceDir(File dir) {
-        this.sourceDir.set(dir)
-    }
-
-    void setSourceDir(Directory dir) {
-        this.sourceDir.set(dir)
-    }
-
-    void setSourceFiles(Object... files) {
-        this.sourceFiles.setFrom(files)
-    }
-
-    void setSourceFiles(Iterable<?> files) {
-        this.sourceFiles.setFrom(files)
+    private File normaliseIcon(File icon) {
+        return new File(icon.parent, FilenameUtils.getBaseName(icon.name) + "." + Platform.iconExtension)
     }
 
     private <T> void executeOsOptionsAction(String methodName, Action<T> action) {
