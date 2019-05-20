@@ -7,7 +7,7 @@ This allows to create ``.dmg``, ``.exe``, etc.
 
 ### Usage
 
-Build script snippet:
+Include the following to the top of your _build.gradle_ file:
 
 ```groovy
 plugins {
