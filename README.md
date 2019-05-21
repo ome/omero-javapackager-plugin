@@ -1,7 +1,8 @@
-### OMERO javapackager Gradle plugin
+## OMERO javapackager Gradle plugin
 
-The _omero-javapackager-plugin_ is a gradle plugin that provides infrastructure to package applications.
-This allows to create ``.dmg``, ``.exe``, etc.
+The _omero-javapackager-plugin_ is a [Gradle](https://gradle.org) plugin that provides
+infrastructure for packaging Java applications for different platforms, including
+``.dmg`` for Mac OS X and ``.exe`` for Windows.
 
 ### Usage
 
@@ -13,11 +14,18 @@ plugins {
 }
 ```
 
-To create OMERO.importer dmg for example, run:
+Targets of the form:
 
 ```groovy
 
-packageNameApplicationDmg
+packageNAMEApplicationTYPE
 
 ```
-where ``Name`` is ``Importer``.
+
+exist for the various components. For example, to create an OMERO.importer .dmg run:
+
+```groovy
+
+packageImporterApplicationDmg
+
+```
