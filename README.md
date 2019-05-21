@@ -9,7 +9,7 @@ Include the following at the top of your _build.gradle_ file:
 
 ```groovy
 plugins {
-    id "org.openmicroscopy.packager" version "1.0.0"
+    id "org.openmicroscopy.packager" version "x.y.z"
 }
 ```
 
