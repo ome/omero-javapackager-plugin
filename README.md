@@ -5,8 +5,6 @@ This allows to create ``.dmg``, ``.exe``, etc.
 
 ### Usage
 
-### Usage
-
 Include the following to the top of your _build.gradle_ file:
 
 ```groovy
