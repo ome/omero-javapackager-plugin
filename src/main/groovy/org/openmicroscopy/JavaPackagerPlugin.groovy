@@ -86,12 +86,6 @@ class JavaPackagerPlugin implements Plugin<Project> {
     }
 
     void configureMain(InstallOptions deploy) {
-        // Default installer types
-        final List<String> outputTypes = Platform.installerTypesAsString
-
-        // Set the default package types
-        deploy.outputTypes = outputTypes
-
         project.afterEvaluate {
             JavaApplication javaApplication = project.extensions.getByType(JavaApplication)
             deploy.mainClassName.convention(javaApplication.mainClassName)
@@ -108,35 +102,29 @@ class JavaPackagerPlugin implements Plugin<Project> {
             deploy.outputFile.convention(layout.buildDirectory.file("packaged/${deploy.name}/${installDistTask.destinationDir.name}"))
             deploy.sourceDir.convention(layout.projectDirectory.dir(installDistTask.destinationDir.toString()))
             deploy.sourceFiles.from(project.fileTree(installDistTask.destinationDir).include("**/*.*"))
-
-            outputTypes.each {
-                String name = makeTaskName(deploy.name, it)
-                project.tasks.named(name).configure {
-                    it.dependsOn(installDistTask)
-                }
-            }
         }
     }
 
     void createJavaPackagerTask(DefaultInstallOptions deploy) {
         // Wait for evaluation as we require the values of outputTypes
-        project.afterEvaluate {
-            // Wait for evaluation as we require the values of outputTypes
-            List<String> outputTypes = deploy.outputTypes.get()
+        List<String> outputTypes = Platform.installerTypesAsString
 
-            outputTypes.each { String outputType ->
-                String taskName = makeTaskName(deploy.name, outputType)
+        outputTypes.each { String outputType ->
+            String taskName = makeTaskName(deploy.name, outputType)
 
-                project.tasks.register(taskName, Exec, new Action<Exec>() {
-                    @Override
-                    void execute(Exec jp) {
-                        jp.setGroup(DISTRIBUTION_GROUP)
-                        jp.setDescription("Creates a $outputType bundle")
-                        jp.commandLine("javapackager", "-deploy")
-                        jp.argumentProviders.addAll(deploy.createCmdArgProviders(outputType))
+            project.tasks.register(taskName, Exec, new Action<Exec>() {
+                @Override
+                void execute(Exec jp) {
+                    if (deploy.name == MAIN_DEPLOY_NAME) {
+                        jp.dependsOn(project.tasks.named("installDist"))
                     }
-                })
-            }
+
+                    jp.setGroup(DISTRIBUTION_GROUP)
+                    jp.setDescription("Creates a $outputType bundle")
+                    jp.commandLine("javapackager", "-deploy")
+                    jp.argumentProviders.addAll(deploy.createCmdArgProviders(outputType))
+                }
+            })
         }
     }
 

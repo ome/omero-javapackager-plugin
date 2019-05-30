@@ -34,6 +34,9 @@ import org.gradle.api.provider.Provider
 import org.openmicroscopy.extensions.implementation.MacOptions
 import org.openmicroscopy.extensions.implementation.WinOptions
 
+/**
+ * Valid installer types are: {"exe", "msi", "rpm", "deb", "pkg", "dmg"}.
+ */
 @CompileStatic
 interface InstallOptions extends Named, Extensible {
 
@@ -127,18 +130,6 @@ interface InstallOptions extends Named, Extensible {
      * @return
      */
     Provider<List<String>> getOutputTypes()
-
-    /**
-     * Valid values are: {"exe", "msi", "rpm", "deb", "pkg", "dmg"}.
-     * @param types
-     */
-    void setOutputTypes(String... types)
-
-    /**
-     * Valid values are: {"exe", "msi", "rpm", "deb", "pkg", "dmg"}.
-     * @param types
-     */
-    void setOutputTypes(Iterable<? extends String> types)
 
     /**
      * Command line arguments to pass to the main class if no command line arguments are given to the launcher
@@ -260,24 +251,24 @@ interface InstallOptions extends Named, Extensible {
      * Configure execuable specific options for javapackager (Windows only)
      * @param action
      */
-    void exe(Action<? super WinOptions> action)
+    void exe(Action<? extends WinOptions> action)
 
     /**
      * Configure msi specific options for javapackager (Windows only)
      * @param action
      */
-    void msi(Action<? super WinOptions> action)
+    void msi(Action<? extends WinOptions> action)
 
     /**
      * Configure dmg specific options for javapackager (Mac only)
      * @param action
      */
-    void dmg(Action<? super MacOptions> action)
+    void dmg(Action<? extends MacOptions> action)
 
     /**
      * Configure pkg specific options for javapackager (Mac only)
      * @param action
      */
-    void pkg(Action<? super MacOptions> action)
+    void pkg(Action<? extends MacOptions> action)
 
 }
