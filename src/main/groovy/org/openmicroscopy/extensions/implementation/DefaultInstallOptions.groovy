@@ -278,8 +278,7 @@ class DefaultInstallOptions implements InstallOptions {
 
             options = extensionContainer.findByName(extensionName) as T
             if (!options) {
-                throw new GradleException("You have to add '${extensionName}' as an outputType " +
-                        "before attempting to configure these install options")
+                throw new GradleException("Unable to add extension '${extensionName}'")
             }
         }
         action.execute(options)
