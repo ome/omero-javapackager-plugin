@@ -1,6 +1,6 @@
 plugins {
     id "groovy"
-    id "org.openmicroscopy.plugin-project" version "5.5.2-SNAPSHOT"
+    id "org.openmicroscopy.plugin-project" version "5.5.1"
 }
 
 group = "org.openmicroscopy"

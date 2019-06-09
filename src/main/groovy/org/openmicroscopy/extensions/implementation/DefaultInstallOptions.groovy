@@ -30,6 +30,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -89,8 +90,6 @@ class DefaultInstallOptions implements InstallOptions {
         this.outputFile = project.objects.fileProperty()
         this.sourceDir = project.objects.directoryProperty()
         this.sourceFiles = project.files()
-
-        this.addExtensions("exe", "msi", "dmg", "pkg")
     }
 
     Iterable<CommandLineArgumentProvider> createCmdArgProviders(String outputType) {
@@ -234,22 +233,22 @@ class DefaultInstallOptions implements InstallOptions {
     }
 
     @Override
-    void exe(Action<? extends WinOptions> action) {
+    void exe(Action<? super WinOptions> action) {
         executeOsOptionsAction("exe", action)
     }
 
     @Override
-    void msi(Action<? extends WinOptions> action) {
+    void msi(Action<? super WinOptions> action) {
         executeOsOptionsAction("msi", action)
     }
 
     @Override
-    void dmg(Action<? extends MacOptions> action) {
+    void dmg(Action<? super MacOptions> action) {
         executeOsOptionsAction("dmg", action)
     }
 
     @Override
-    void pkg(Action<? extends MacOptions> action) {
+    void pkg(Action<? super MacOptions> action) {
         executeOsOptionsAction("pkg", action)
     }
 
@@ -272,6 +271,10 @@ class DefaultInstallOptions implements InstallOptions {
     }
 
     private <T> void executeOsOptionsAction(String extensionName, Action<T> action) {
+        if (!(this instanceof ExtensionAware)) {
+            throw new GradleException("This class instance is not extensions aware")
+        }
+
         T options = extensionContainer.findByName(extensionName) as T
         if (!options) {
             addExtension(extensionName)
@@ -284,19 +287,24 @@ class DefaultInstallOptions implements InstallOptions {
         action.execute(options)
     }
 
-    private def addExtensions(String... types) {
-        types.each { addExtension(it) }
-    }
-
     private def addExtension(String type) {
+        if (!(this instanceof ExtensionAware)) {
+            throw new GradleException("This class instance is not extensions aware")
+        }
+
+        def extensions = extensionContainer
         switch (type) {
             case "exe":
+                extensions.create(type, ExeOptions, project)
+                break
             case "msi":
-                extensionContainer.create(type, WinOptions, type, project)
+                extensions.create(type, MsiOptions, project)
                 break
             case "dmg":
+                extensions.create(type, DmgOptions, project)
+                break
             case "pkg":
-                extensionContainer.create(type, MacOptions, type, project)
+                extensions.create(type, PkgOptions, project)
                 break
         }
     }

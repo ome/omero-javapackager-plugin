@@ -131,7 +131,7 @@ class JavaPackagerPlugin implements Plugin<Project> {
     /**
      * Create a task name e.g. 'packageImporterApplicationDmg' or 'packageImporterApplicationExe'
      *
-     * Default name when using 'main' as an install option is 'packageApplication(Dmg, Exe, etc.)'
+     * Default name when using 'main' as an install option is 'packageApplication(DmgOptions, Exe, etc.)'
      * @param configName deploy configuration name
      * @param outputType possible output types [exe, msi, dmg, pkg]
      * @return
