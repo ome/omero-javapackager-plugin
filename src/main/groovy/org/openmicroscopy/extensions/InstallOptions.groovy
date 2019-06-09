@@ -251,24 +251,24 @@ interface InstallOptions extends Named, Extensible {
      * Configure execuable specific options for javapackager (Windows only)
      * @param action
      */
-    void exe(Action<? extends WinOptions> action)
+    void exe(Action<? super WinOptions> action)
 
     /**
      * Configure msi specific options for javapackager (Windows only)
      * @param action
      */
-    void msi(Action<? extends WinOptions> action)
+    void msi(Action<? super WinOptions> action)
 
     /**
      * Configure dmg specific options for javapackager (Mac only)
      * @param action
      */
-    void dmg(Action<? extends MacOptions> action)
+    void dmg(Action<? super MacOptions> action)
 
     /**
      * Configure pkg specific options for javapackager (Mac only)
      * @param action
      */
-    void pkg(Action<? extends MacOptions> action)
+    void pkg(Action<? super MacOptions> action)
 
 }

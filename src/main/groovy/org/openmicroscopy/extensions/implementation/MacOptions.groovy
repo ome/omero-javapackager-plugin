@@ -27,13 +27,14 @@ import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.process.CommandLineArgumentProvider
+import org.openmicroscopy.InstallerType
 import org.openmicroscopy.extensions.BaseOsOptions
 import org.openmicroscopy.tasks.JavaPackagerDeployDmg
 import org.openmicroscopy.tasks.JavaPackagerDeployPkg
 
 @SuppressWarnings("UnstableApiUsage")
 @CompileStatic
-class MacOptions implements BaseOsOptions {
+abstract class MacOptions implements BaseOsOptions {
 
     final Property<Boolean> systemWide
 
@@ -45,7 +46,7 @@ class MacOptions implements BaseOsOptions {
 
     private final String installerType
 
-    MacOptions(String type, Project project) {
+    MacOptions(InstallerType type, Project project) {
         this.installerType = type
         this.project = project
         this.systemWide = project.objects.property(Boolean)
