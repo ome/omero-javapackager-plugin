@@ -25,51 +25,24 @@ import org.apache.commons.io.FilenameUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.Property
-import org.gradle.process.CommandLineArgumentProvider
 import org.openmicroscopy.InstallerType
-import org.openmicroscopy.extensions.BaseOsOptions
-import org.openmicroscopy.tasks.JavaPackagerDeployDmg
-import org.openmicroscopy.tasks.JavaPackagerDeployPkg
+import org.openmicroscopy.extensions.InstallOsOptions
 
 @SuppressWarnings("UnstableApiUsage")
 @CompileStatic
-abstract class MacOptions implements BaseOsOptions {
-
-    final Property<Boolean> systemWide
-
-    final Property<Boolean> simple
+abstract class MacOptions implements InstallOsOptions {
 
     final RegularFileProperty icon
 
-    private final Project project
+    protected final Project project
 
-    private final String installerType
+    protected final String installerType
 
     MacOptions(InstallerType type, Project project) {
         this.installerType = type
         this.project = project
-        this.systemWide = project.objects.property(Boolean)
-        this.simple = project.objects.property(Boolean)
+
         this.icon = project.objects.fileProperty()
-
-        this.systemWide.convention(true)
-        this.simple.convention(true)
-    }
-
-    @Override
-    CommandLineArgumentProvider createCmdArgsProvider() {
-        if (installerType == "dmg") {
-            def provider = new JavaPackagerDeployDmg(project)
-            provider.systemWide.set(systemWide)
-            provider.simple.set(simple)
-            return provider
-        } else if (installerType == "pkg") {
-            def provider = new JavaPackagerDeployPkg(project)
-            return provider
-        } else {
-            throw new GradleException("Unknown installer installerType")
-        }
     }
 
     void setIcon(File icon) {
