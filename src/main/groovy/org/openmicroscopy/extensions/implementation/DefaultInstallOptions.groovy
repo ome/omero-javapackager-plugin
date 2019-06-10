@@ -36,7 +36,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.process.CommandLineArgumentProvider
 import org.openmicroscopy.Platform
-import org.openmicroscopy.extensions.BaseOsOptions
+import org.openmicroscopy.extensions.InstallOsOptions
 import org.openmicroscopy.extensions.InstallOptions
 import org.openmicroscopy.tasks.JavaPackagerDeploy
 
@@ -95,7 +95,7 @@ class DefaultInstallOptions implements InstallOptions {
     Iterable<CommandLineArgumentProvider> createCmdArgProviders(String outputType) {
         List<CommandLineArgumentProvider> cmdArgProviders = []
 
-        BaseOsOptions osOptions = extensionContainer.getByName(outputType) as BaseOsOptions
+        InstallOsOptions osOptions = extensionContainer.getByName(outputType) as InstallOsOptions
         osOptions.icon.convention(icon)
 
         JavaPackagerDeploy deployCmdProps = new JavaPackagerDeploy(project)
@@ -166,27 +166,6 @@ class DefaultInstallOptions implements InstallOptions {
     @Override
     void setMainJar(Provider<? extends String> name) {
         this.mainJar.set(name)
-    }
-
-    @Override
-    void setOutputTypes(String... types) {
-        this.setOutputTypes(types.toList())
-    }
-
-    @Override
-    void setOutputTypes(Iterable<? extends String> types) {
-        if (!(this instanceof ExtensionAware)) {
-            throw new GradleException("DefaultInstallOptions is not extension aware")
-        }
-
-        this.outputTypes.set(types)
-
-        types.each { String type ->
-            def extThis = this as ExtensionAware
-            if (!extThis.extensions.findByName(type)) {
-                addExtension(extThis, type)
-            }
-        }
     }
 
     @Override
@@ -274,7 +253,7 @@ class DefaultInstallOptions implements InstallOptions {
     }
 
     Provider<Directory> getOutputDir() {
-        return this.outputFile.flatMap { RegularFile regularFile ->
+        this.outputFile.flatMap { RegularFile regularFile ->
             DirectoryProperty property = project.objects.directoryProperty()
             property.set(regularFile.asFile.getParentFile())
             property
@@ -282,7 +261,7 @@ class DefaultInstallOptions implements InstallOptions {
     }
 
     Provider<String> getOutputFileName() {
-        return this.outputFile.map { RegularFile regularFile ->
+        this.outputFile.map { RegularFile regularFile ->
             regularFile.asFile.name
         }
     }
@@ -291,24 +270,41 @@ class DefaultInstallOptions implements InstallOptions {
         return new File(icon.parent, FilenameUtils.getBaseName(icon.name) + "." + Platform.iconExtension)
     }
 
-    private <T> void executeOsOptionsAction(String methodName, Action<T> action) {
-        T options = extensionContainer.findByName(methodName) as T
+    private <T> void executeOsOptionsAction(String extensionName, Action<T> action) {
+        if (!(this instanceof ExtensionAware)) {
+            throw new GradleException("This class instance is not extensions aware")
+        }
+
+        T options = extensionContainer.findByName(extensionName) as T
         if (!options) {
-            throw new GradleException("You have to add '${methodName}' as an outputType " +
-                    "before attempting to configure these install options")
+            addExtension(extensionName)
+
+            options = extensionContainer.findByName(extensionName) as T
+            if (!options) {
+                throw new GradleException("Unable to add extension '${extensionName}'")
+            }
         }
         action.execute(options)
     }
 
-    private def addExtension(ExtensionAware extContainer, String type) {
+    void addExtension(String type) {
+        if (!(this instanceof ExtensionAware)) {
+            throw new GradleException("This class instance is not extensions aware")
+        }
+
+        def extensions = extensionContainer
         switch (type) {
             case "exe":
+                extensions.create(type, ExeInstallOptions, project)
+                break
             case "msi":
-                extContainer.extensions.create(type, WinOptions, type, project)
+                extensions.create(type, MsiInstallOptions, project)
                 break
             case "dmg":
+                extensions.create(type, DmgInstallOptions, project)
+                break
             case "pkg":
-                extContainer.extensions.create(type, MacOptions, type, project)
+                extensions.create(type, PkgInstallOptions, project)
                 break
         }
     }

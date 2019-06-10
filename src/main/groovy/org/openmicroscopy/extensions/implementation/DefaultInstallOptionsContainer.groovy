@@ -24,6 +24,7 @@ import groovy.transform.CompileStatic
 import org.gradle.api.Project
 import org.gradle.api.internal.AbstractNamedDomainObjectContainer
 import org.gradle.api.internal.CollectionCallbackActionDecorator
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.internal.reflect.Instantiator
 import org.openmicroscopy.extensions.InstallOptions
 import org.openmicroscopy.extensions.InstallOptionsContainer
@@ -42,7 +43,15 @@ class DefaultInstallOptionsContainer extends AbstractNamedDomainObjectContainer<
 
     @Override
     protected InstallOptions doCreate(String name) {
-        return getInstantiator().newInstance(DefaultInstallOptions, name, project)
+        DefaultInstallOptions installOptions =
+                getInstantiator().newInstance(DefaultInstallOptions, name, project)
+
+        installOptions.addExtension("dmg")
+        installOptions.addExtension("pkg")
+        installOptions.addExtension("exe")
+        installOptions.addExtension("msi")
+
+        return installOptions
     }
 
 }

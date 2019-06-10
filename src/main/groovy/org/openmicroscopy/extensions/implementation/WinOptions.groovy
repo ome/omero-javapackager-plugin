@@ -27,12 +27,13 @@ import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.process.CommandLineArgumentProvider
-import org.openmicroscopy.extensions.BaseOsOptions
+import org.openmicroscopy.InstallerType
+import org.openmicroscopy.extensions.InstallOsOptions
 import org.openmicroscopy.tasks.JavaPackagerDeployWin
 
 @SuppressWarnings("UnstableApiUsage")
 @CompileStatic
-class WinOptions implements BaseOsOptions {
+abstract class WinOptions implements InstallOsOptions {
 
     final Property<Boolean> installDirChooser
 
@@ -50,9 +51,9 @@ class WinOptions implements BaseOsOptions {
 
     private final Project project
 
-    private final String type
+    private final InstallerType type
 
-    WinOptions(String type, Project project) {
+    WinOptions(InstallerType type, Project project) {
         this.type = type
         this.project = project
         this.installDirChooser = project.objects.property(Boolean)

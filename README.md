@@ -29,3 +29,38 @@ exist for the various components. For example, to create an OMERO.importer .dmg 
 packageImporterApplicationDmg
 
 ```
+
+Gradle plugin configuration example:
+
+```gradle
+deploy {
+    main {
+        icon = "${projectDir}/icons/omeroInsight" // Change the icon, file extension is automatic depending on OS
+        arguments = ["container.xml"]
+    }
+}
+```
+
+Full custom example:
+
+```gradle
+deploy {
+    someApp {
+        outputTypes = ["exe", "dmg"]                            // this deploy config will create tasks for exe or dmg installers, depending on OS
+        mainClassName = "org.myurl.Main"                        // main class package and name
+        javaOptions = ["-Xms256m", "-Xmx1024m"]                 // custom JVM options
+        mainJar = "someApp"                                     // you application jar filename
+        sourceDir = file("$buildDir/install/someApp)            // the root directory of your distributable application
+        sourceFiles = fileTree("$buildDir/install/someApp).include("**/*.*") 
+        applicationVersion = "$version"
+        dmg {
+            systemWide = true
+            simple = false
+        }
+        msi {
+            copyright = "MIT"
+            addShortcut = false
+        }
+    }
+}
+```
