@@ -15,10 +15,6 @@ repositories {
     jcenter()
 }
 
-dependencies {
-    implementation "commons-io:commons-io:2.6"
-}
-
 gradlePlugin {
     plugins {
         javapackager {
