@@ -36,7 +36,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.process.CommandLineArgumentProvider
 import org.openmicroscopy.Platform
-import org.openmicroscopy.extensions.BaseOsOptions
+import org.openmicroscopy.extensions.InstallOsOptions
 import org.openmicroscopy.extensions.InstallOptions
 import org.openmicroscopy.tasks.JavaPackagerDeploy
 
@@ -95,7 +95,7 @@ class DefaultInstallOptions implements InstallOptions {
     Iterable<CommandLineArgumentProvider> createCmdArgProviders(String outputType) {
         List<CommandLineArgumentProvider> cmdArgProviders = []
 
-        BaseOsOptions osOptions = extensionContainer.getByName(outputType) as BaseOsOptions
+        InstallOsOptions osOptions = extensionContainer.getByName(outputType) as InstallOsOptions
         osOptions.icon.convention(icon)
 
         JavaPackagerDeploy deployCmdProps = new JavaPackagerDeploy(project)
@@ -253,7 +253,7 @@ class DefaultInstallOptions implements InstallOptions {
     }
 
     Provider<Directory> getOutputDir() {
-        return this.outputFile.flatMap { RegularFile regularFile ->
+        this.outputFile.flatMap { RegularFile regularFile ->
             DirectoryProperty property = project.objects.directoryProperty()
             property.set(regularFile.asFile.getParentFile())
             property
@@ -261,7 +261,7 @@ class DefaultInstallOptions implements InstallOptions {
     }
 
     Provider<String> getOutputFileName() {
-        return this.outputFile.map { RegularFile regularFile ->
+        this.outputFile.map { RegularFile regularFile ->
             regularFile.asFile.name
         }
     }
@@ -287,7 +287,7 @@ class DefaultInstallOptions implements InstallOptions {
         action.execute(options)
     }
 
-    private def addExtension(String type) {
+    void addExtension(String type) {
         if (!(this instanceof ExtensionAware)) {
             throw new GradleException("This class instance is not extensions aware")
         }
@@ -295,16 +295,16 @@ class DefaultInstallOptions implements InstallOptions {
         def extensions = extensionContainer
         switch (type) {
             case "exe":
-                extensions.create(type, ExeOptions, project)
+                extensions.create(type, ExeInstallOptions, project)
                 break
             case "msi":
-                extensions.create(type, MsiOptions, project)
+                extensions.create(type, MsiInstallOptions, project)
                 break
             case "dmg":
-                extensions.create(type, DmgOptions, project)
+                extensions.create(type, DmgInstallOptions, project)
                 break
             case "pkg":
-                extensions.create(type, PkgOptions, project)
+                extensions.create(type, PkgInstallOptions, project)
                 break
         }
     }

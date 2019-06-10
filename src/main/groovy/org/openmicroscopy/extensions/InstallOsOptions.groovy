@@ -25,7 +25,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.process.CommandLineArgumentProvider
 
 @CompileStatic
-interface BaseOsOptions {
+interface InstallOsOptions {
 
     CommandLineArgumentProvider createCmdArgsProvider()
 
