@@ -46,7 +46,7 @@ Full custom example:
 ```gradle
 deploy {
     someApp {
-        outputTypes = ["msi", "dmg"]                            // this deploy config will create tasks for msi or dmg installers, depending on OS
+        outputTypes = ["exe", "dmg"]                            // this deploy config will create tasks for exe or dmg installers, depending on OS
         mainClassName = "org.myurl.Main"                        // main class package and name
         javaOptions = ["-Xms256m", "-Xmx1024m"]                 // custom JVM options
         mainJar = "someApp"                                     // you application jar filename
