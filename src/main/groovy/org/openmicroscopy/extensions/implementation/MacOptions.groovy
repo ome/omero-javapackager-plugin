@@ -21,11 +21,11 @@
 package org.openmicroscopy.extensions.implementation
 
 import groovy.transform.CompileStatic
-import org.apache.commons.io.FilenameUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.openmicroscopy.InstallerType
+import org.openmicroscopy.extensions.FileUtils
 import org.openmicroscopy.extensions.InstallOsOptions
 
 @SuppressWarnings("UnstableApiUsage")
@@ -46,7 +46,7 @@ abstract class MacOptions implements InstallOsOptions {
     }
 
     void setIcon(File icon) {
-        String fileExtension = FilenameUtils.getExtension(icon.getName())
+        String fileExtension = FileUtils.getExtension(icon)
         if (fileExtension != "icns") {
             throw new GradleException("Only .icn extension supported, supplied: $fileExtension")
         }
