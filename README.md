@@ -1,3 +1,5 @@
+[![Actions Status](https://github.com/ome/omero-javapackager-plugin/workflows/Gradle/badge.svg)](https://github.com/ome/omero-javapackager-plugin/actions)
+
 ## OMERO javapackager Gradle plugin
 
 The _omero-javapackager-plugin_ is a [Gradle](https://gradle.org) plugin that provides
