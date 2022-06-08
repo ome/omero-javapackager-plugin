@@ -9,11 +9,11 @@ on:
 
 jobs:
   build:
-    uses: ome/action-workflows/.github/workflows/gradle_build.yml@v1
+    uses: ome/action-workflows/.github/workflows/gradle_build.yml@v1.2
   publish_snapshots:
     if: ${{ github.ref == 'refs/heads/master' && github.repository_owner == 'ome' }}
     needs: build
-    uses: ome/action-workflows/.github/workflows/gradle_publish.yml@v1
+    uses: ome/action-workflows/.github/workflows/gradle_publish.yml@v1.2
     with:
       ARTIFACTORY_URL: "snapshots"
     secrets:
@@ -22,7 +22,7 @@ jobs:
   publish:
     needs: build
     if: startsWith(github.ref, 'refs/tags') && github.repository_owner == 'ome'
-    uses: ome/action-workflows/.github/workflows/gradle_publish.yml@v1
+    uses: ome/action-workflows/.github/workflows/gradle_publish.yml@v1.2
     with:
       ARTIFACTORY_URL: "staging"
     secrets:
