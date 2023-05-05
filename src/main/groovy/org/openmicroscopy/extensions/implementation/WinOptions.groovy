@@ -21,13 +21,13 @@
 package org.openmicroscopy.extensions.implementation
 
 import groovy.transform.CompileStatic
-import org.apache.commons.io.FilenameUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.process.CommandLineArgumentProvider
 import org.openmicroscopy.InstallerType
+import org.openmicroscopy.extensions.FileUtils
 import org.openmicroscopy.extensions.InstallOsOptions
 import org.openmicroscopy.tasks.JavaPackagerDeployWin
 
@@ -106,7 +106,7 @@ abstract class WinOptions implements InstallOsOptions {
     }
 
     void setIcon(File icon) {
-        String fileExtension = FilenameUtils.getExtension(icon.getName())
+        String fileExtension = FileUtils.getExtension(icon)
         if (fileExtension != "ico") {
             throw new GradleException("Only .ico extension supported, supplied: $fileExtension")
         }

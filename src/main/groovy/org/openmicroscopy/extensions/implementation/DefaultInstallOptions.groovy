@@ -21,7 +21,6 @@
 package org.openmicroscopy.extensions.implementation
 
 import groovy.transform.CompileStatic
-import org.apache.commons.io.FilenameUtils
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -38,6 +37,7 @@ import org.gradle.process.CommandLineArgumentProvider
 import org.openmicroscopy.Platform
 import org.openmicroscopy.extensions.InstallOsOptions
 import org.openmicroscopy.extensions.InstallOptions
+import org.openmicroscopy.extensions.FileUtils
 import org.openmicroscopy.tasks.JavaPackagerDeploy
 
 @SuppressWarnings("UnstableApiUsage")
@@ -267,7 +267,7 @@ class DefaultInstallOptions implements InstallOptions {
     }
 
     private File normaliseIcon(File icon) {
-        return new File(icon.parent, FilenameUtils.getBaseName(icon.name) + "." + Platform.iconExtension)
+        return new File(icon.parent, FileUtils.getBaseName(icon) + "." + Platform.iconExtension)
     }
 
     private <T> void executeOsOptionsAction(String extensionName, Action<T> action) {
